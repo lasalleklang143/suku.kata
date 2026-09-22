@@ -4,12 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>kembara suku kata jalan raya</title>
+
+<!-- Import Google Font 'Fredoka' supaya cantik & bulat di semua TELEFON BIMBIT -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+    font-family: 'Fredoka', "Comic Sans MS", cursive, sans-serif;
     text-transform: lowercase;
   }
 
@@ -38,6 +44,45 @@
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  .start-screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    color: white;
+    gap: 20px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .start-screen h1 {
+    font-size: 36px;
+    color: #f1c40f;
+  }
+
+  .btn-start {
+    background: #2ed573;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 26px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 6px 0 #26af5f;
+    transition: transform 0.1s;
+    font-family: 'Fredoka', sans-serif;
+  }
+
+  .btn-start:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #26af5f;
   }
 
   .ui-layer {
@@ -78,6 +123,7 @@
     cursor: pointer;
     font-weight: bold;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-family: 'Fredoka', sans-serif;
   }
 
   .correct-banner {
@@ -125,9 +171,9 @@
   }
 
   .steering-wheel {
-    width: 110px;
-    height: 110px;
-    border: 14px solid #1e272e;
+    width: 100px;
+    height: 100px;
+    border: 12px solid #1e272e;
     border-radius: 50%;
     position: relative;
     background: radial-gradient(circle, #485460 0%, #1e272e 100%);
@@ -136,11 +182,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: transform 0.1s;
+  }
+
+  .steering-wheel:active {
+    transform: scale(0.95);
   }
 
   .mic-btn {
-    width: 50px;
-    height: 50px;
+    width: 46px;
+    height: 46px;
     background: #ff4757;
     border: 3px solid white;
     border-radius: 50%;
@@ -148,14 +199,14 @@
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: 24px;
+    font-size: 22px;
     box-shadow: 0 0 12px rgba(255, 71, 87, 0.8);
-    animation: pulse 1.5s infinite;
   }
 
   .mic-btn.listening {
     background: #2ed573;
     box-shadow: 0 0 20px rgba(46, 213, 115, 1);
+    animation: pulse 1s infinite;
   }
 
   @keyframes pulse {
@@ -173,12 +224,12 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    min-width: 380px;
+    min-width: 400px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
   .status-text {
-    font-size: 16px;
+    font-size: 15px;
     color: #2f3542;
     font-weight: bold;
     text-align: center;
@@ -193,13 +244,14 @@
     background: #3742fa;
     color: white;
     border: none;
-    padding: 8px 20px;
-    font-size: 22px;
+    padding: 8px 22px;
+    font-size: 24px;
     border-radius: 12px;
     cursor: pointer;
     font-weight: bold;
     box-shadow: 0 4px 0 #1e90ff;
     transition: all 0.1s;
+    font-family: 'Fredoka', sans-serif;
   }
 
   .btn-option:active {
@@ -235,12 +287,19 @@
     cursor: pointer;
     font-weight: bold;
     box-shadow: 0 5px 0 #ff4757;
+    font-family: 'Fredoka', sans-serif;
   }
 </style>
 </head>
 <body>
 
 <div id="game-container">
+  <div class="start-screen" id="startScreen">
+    <h1>🚗 kembara suku kata 🚗</h1>
+    <p style="font-size: 18px;">sebutkan suku kata atau tekan pada jawapan yang betul!</p>
+    <button class="btn-start" onclick="startGame()">mula main 🚀</button>
+  </div>
+
   <canvas id="gameCanvas" width="850" height="550"></canvas>
 
   <div class="correct-banner" id="correctBanner">
@@ -255,14 +314,14 @@
 
     <div class="dashboard">
       <div class="steering-box">
-        <div class="steering-wheel" onclick="startListening()">
+        <div class="steering-wheel" onclick="toggleMicManual()">
           <div class="mic-btn" id="micBtn">🎤</div>
         </div>
-        <span style="color: white; font-size: 12px; font-weight: bold;">tekan mic & sebut</span>
+        <span style="color: white; font-size: 12px; font-weight: bold;">tekan stereng untuk sebut</span>
       </div>
 
       <div class="control-panel">
-        <div class="status-text" id="statusText">kereta sedang bergerak...</div>
+        <div class="status-text" id="statusText">tekan 'mula main' untuk bermula</div>
         <div class="syllable-options" id="optionsContainer"></div>
       </div>
     </div>
@@ -276,7 +335,7 @@
 </div>
 
 <script>
-  // senarai suku kata (tanpa 'ci' dan 'si')
+  // Senarai Suku Kata Terbuka (Tanpa 'ci' dan 'si')
   const fullSyllableList = [
     'ba', 'bi', 'bu', 'ca', 'cu', 'da', 'di', 'du',
     'ga', 'gi', 'gu', 'ka', 'ki', 'ku', 'la', 'li', 'lu',
@@ -303,6 +362,7 @@
   let currentIndex = 0;
   let isStopped = false;
   let roadOffset = 0;
+  let gameStarted = false;
 
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
@@ -312,11 +372,26 @@
   const winScreen = document.getElementById('winScreen');
   const micBtn = document.getElementById('micBtn');
   const correctBanner = document.getElementById('correctBanner');
+  const startScreen = document.getElementById('startScreen');
 
   let audioCtx = null;
   let isMusicOn = false;
   let musicInterval = null;
   let recognition = null;
+  let isListening = false;
+
+  async function requestMicPermission() {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        return true;
+      }
+    } catch (err) {
+      console.log("Akses mic ditolak/disekat:", err);
+    }
+    return false;
+  }
 
   function initSpeech() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -327,8 +402,9 @@
       recognition.interimResults = false;
 
       recognition.onstart = () => {
+        isListening = true;
         micBtn.classList.add('listening');
-        statusText.innerText = "mendengar... sebut sekarang!";
+        statusText.innerText = "🎤 sedang mendengar... sebut sekarang!";
       };
 
       recognition.onresult = (event) => {
@@ -337,30 +413,51 @@
       };
 
       recognition.onerror = () => {
+        isListening = false;
         micBtn.classList.remove('listening');
-        statusText.innerText = "tidak dengar. tekan mic dan cuba lagi!";
+        if (isStopped && gameStarted) {
+          statusText.innerText = "tidak dapat dengar. tekan stereng atau klik jawapan di bawah!";
+        }
       };
 
       recognition.onend = () => {
+        isListening = false;
         micBtn.classList.remove('listening');
       };
     }
   }
 
-  function startListening() {
-    if (!isStopped) {
-      statusText.innerText = "tunggu kereta berhenti di papan tanda!";
-      return;
+  async function startGame() {
+    startScreen.style.display = 'none';
+    gameStarted = true;
+    
+    await requestMicPermission();
+    initSpeech();
+    
+    pickRandomSyllables();
+    scheduleNextSign();
+  }
+
+  function toggleMicManual() {
+    if (!isStopped || !gameStarted) return;
+
+    if (!recognition) {
+      initSpeech();
     }
+
     if (recognition) {
-      try {
-        recognition.start();
-      } catch (e) {
-        recognition.stop();
-        setTimeout(() => recognition.start(), 200);
+      if (isListening) {
+        try { recognition.stop(); } catch(e){}
+      } else {
+        try {
+          recognition.start();
+        } catch (e) {
+          try { recognition.stop(); } catch(err){}
+          setTimeout(() => { try { recognition.start(); } catch(err){} }, 200);
+        }
       }
     } else {
-      alert("peranti/pelayar ini tidak menyokong mikrofon. sila tekan butang pilihan di bawah.");
+      statusText.innerText = "mikrofon tidak disokong. sila klik butang jawapan!";
     }
   }
 
@@ -375,7 +472,7 @@
     if (isCorrect) {
       handleCorrectAnswer(correct);
     } else {
-      statusText.innerText = `terdengar: "${spokenText}". cuba lagi!`;
+      statusText.innerText = `terdengar: "${spokenText}". salah, cuba lagi!`;
     }
   }
 
@@ -419,7 +516,7 @@
     ctx.fill();
 
     // garisan jalan
-    if (!isStopped) roadOffset = (roadOffset + 4) % 40;
+    if (!isStopped && gameStarted) roadOffset = (roadOffset + 4) % 40;
     ctx.strokeStyle = "#f1c40f";
     ctx.lineWidth = 6;
     ctx.setLineDash([20, 20]);
@@ -430,7 +527,7 @@
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // papan tanda tinggi
+    // papan tanda tinggi (Lukis Font Fredoka pada Canvas)
     if (isStopped) {
       ctx.fillStyle = "#7f8c8d";
       ctx.fillRect(620, 140, 14, 180);
@@ -444,9 +541,10 @@
       ctx.stroke();
 
       ctx.fillStyle = "#2c3e50";
-      ctx.font = "bold 38px 'Comic Sans MS', cursive";
+      // Penggunaan Font Fredoka pada papan tanda
+      ctx.font = "bold 42px 'Fredoka', cursive, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(targetList[currentIndex], 627, 142);
+      ctx.fillText(targetList[currentIndex], 627, 144);
     }
 
     requestAnimationFrame(renderScene);
@@ -471,7 +569,7 @@
   function stopAtSign() {
     isStopped = true;
     const current = targetList[currentIndex];
-    statusText.innerText = "sebut suku kata di papan tanda:";
+    statusText.innerText = "sebut (tekan stereng) ATAU pilih jawapan di bawah:";
     generateOptions(current);
   }
 
@@ -486,13 +584,16 @@
       btn.innerText = opt;
       btn.onclick = () => {
         if (opt === correct) handleCorrectAnswer(correct);
-        else statusText.innerText = "cuba lagi! pilih sebutan yang betul.";
+        else statusText.innerText = "salah, cuba lagi! pilih jawapan yang betul.";
       };
       optionsContainer.appendChild(btn);
     });
   }
 
   function handleCorrectAnswer(syllable) {
+    if (recognition) {
+      try { recognition.stop(); } catch(e){}
+    }
     correctBanner.classList.add('show');
     statusText.innerText = "betul! pandai!";
     optionsContainer.innerHTML = "";
@@ -558,12 +659,10 @@
     scheduleNextSign();
   }
 
-  window.onload = () => {
-    initSpeech();
-    pickRandomSyllables();
+  // Pastikan font sedia dimuat naik sebelum dilukis pada Canvas
+  document.fonts.ready.then(() => {
     renderScene();
-    scheduleNextSign();
-  };
+  });
 </script>
 
 </body>
