@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>kembara suku kata jalan raya</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+    text-transform: lowercase;
+  }
+
+  body {
+    background-color: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    color: #333;
+  }
+
+  #game-container {
+    width: 850px;
+    height: 550px;
+    position: relative;
+    overflow: hidden;
+    border: 6px solid #2d3436;
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    background: #000;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ui-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15px;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+  }
+
+  .badge {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 18px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #2d3436;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    border: 3px solid #ffb142;
+  }
+
+  .btn-music {
+    background: #706fd3;
+    color: white;
+    border: 3px solid #474787;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  .correct-banner {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: #2ed573;
+    color: white;
+    border: 5px solid #ffffff;
+    padding: 15px 35px;
+    border-radius: 30px;
+    font-size: 38px;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .correct-banner.show {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .dashboard {
+    pointer-events: auto;
+    background: linear-gradient(to bottom, #34495e, #2c3e50);
+    border-top: 6px solid #1e272e;
+    border-radius: 80px 80px 0 0 / 25px 25px 0 0;
+    height: 160px;
+    margin: 0 -15px -15px -15px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 20px;
+    position: relative;
+  }
+
+  .steering-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .steering-wheel {
+    width: 110px;
+    height: 110px;
+    border: 14px solid #1e272e;
+    border-radius: 50%;
+    position: relative;
+    background: radial-gradient(circle, #485460 0%, #1e272e 100%);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .mic-btn {
+    width: 50px;
+    height: 50px;
+    background: #ff4757;
+    border: 3px solid white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 24px;
+    box-shadow: 0 0 12px rgba(255, 71, 87, 0.8);
+    animation: pulse 1.5s infinite;
+  }
+
+  .mic-btn.listening {
+    background: #2ed573;
+    box-shadow: 0 0 20px rgba(46, 213, 115, 1);
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(0.95); }
+  }
+
+  .control-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border: 3px solid #ffda79;
+    border-radius: 15px;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 380px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  .status-text {
+    font-size: 16px;
+    color: #2f3542;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .syllable-options {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-option {
+    background: #3742fa;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    font-size: 22px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 0 #1e90ff;
+    transition: all 0.1s;
+  }
+
+  .btn-option:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #1e90ff;
+  }
+
+  .win-screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    gap: 20px;
+    z-index: 10;
+  }
+
+  .win-screen h1 {
+    font-size: 38px;
+    color: #2ed573;
+  }
+
+  .btn-restart {
+    background: #ff6b81;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 22px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 5px 0 #ff4757;
+  }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <canvas id="gameCanvas" width="850" height="550"></canvas>
+
+  <div class="correct-banner" id="correctBanner">
+    betul! 🌟 pandai!
+  </div>
+
+  <div class="ui-layer">
+    <div class="top-bar">
+      <div class="badge" id="progress">papan tanda: 1 / 8</div>
+      <button class="btn-music" id="btnMusic" onclick="toggleMusic()">🎵 muzik: tutup</button>
+    </div>
+
+    <div class="dashboard">
+      <div class="steering-box">
+        <div class="steering-wheel" onclick="startListening()">
+          <div class="mic-btn" id="micBtn">🎤</div>
+        </div>
+        <span style="color: white; font-size: 12px; font-weight: bold;">tekan mic & sebut</span>
+      </div>
+
+      <div class="control-panel">
+        <div class="status-text" id="statusText">kereta sedang bergerak...</div>
+        <div class="syllable-options" id="optionsContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win-screen" id="winScreen">
+    <h1>syabas! anda telah sampai ke destinasi! 🎉</h1>
+    <p style="font-size: 20px;">anda berjaya membaca 8 suku kata terbuka!</p>
+    <button class="btn-restart" onclick="resetGame()">main lagi</button>
+  </div>
+</div>
+
+<script>
+  // senarai suku kata (tanpa 'ci' dan 'si')
+  const fullSyllableList = [
+    'ba', 'bi', 'bu', 'ca', 'cu', 'da', 'di', 'du',
+    'ga', 'gi', 'gu', 'ka', 'ki', 'ku', 'la', 'li', 'lu',
+    'ma', 'mi', 'mu', 'na', 'ni', 'nu', 'pa', 'pi', 'pu',
+    'ra', 'ri', 'ru', 'sa', 'su', 'ta', 'ti', 'tu',
+    'ya', 'yu', 'za', 'zi', 'zu'
+  ];
+
+  const phoneticMap = {
+    'bi': ['bi', 'be', 'bee', 'b', 'bhi', 'bey', 'v', 'beat', 'bill'],
+    'di': ['di', 'dee', 'de', 'd', 'day', 'dii', 'the', 'thee', 'deep', 'deal'],
+    'pi': ['pi', 'pee', 'pe', 'p', 'pay', 'pie', 'pea', 'peak', 'pink', 'pig'],
+    'li': ['li', 'lee', 'leeh', 'ly', 'lie', 'le', 'lin'],
+    'ba': ['ba', 'bah', 'bar', 'ber'],
+    'bu': ['bu', 'boo', 'bo'],
+    'pu': ['pu', 'poo', 'po'],
+    'su': ['su', 'soo', 'so'],
+    'ta': ['ta', 'tar', 'ter'],
+    'ro': ['ro', 'row', 'raw'],
+    'me': ['me', 'may', 'meh']
+  };
+
+  let targetList = [];
+  let currentIndex = 0;
+  let isStopped = false;
+  let roadOffset = 0;
+
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const statusText = document.getElementById('statusText');
+  const optionsContainer = document.getElementById('optionsContainer');
+  const progress = document.getElementById('progress');
+  const winScreen = document.getElementById('winScreen');
+  const micBtn = document.getElementById('micBtn');
+  const correctBanner = document.getElementById('correctBanner');
+
+  let audioCtx = null;
+  let isMusicOn = false;
+  let musicInterval = null;
+  let recognition = null;
+
+  function initSpeech() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ms-MY';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        micBtn.classList.add('listening');
+        statusText.innerText = "mendengar... sebut sekarang!";
+      };
+
+      recognition.onresult = (event) => {
+        const spokenText = event.results[0][0].transcript.toLowerCase().trim();
+        checkSpeechAnswer(spokenText);
+      };
+
+      recognition.onerror = () => {
+        micBtn.classList.remove('listening');
+        statusText.innerText = "tidak dengar. tekan mic dan cuba lagi!";
+      };
+
+      recognition.onend = () => {
+        micBtn.classList.remove('listening');
+      };
+    }
+  }
+
+  function startListening() {
+    if (!isStopped) {
+      statusText.innerText = "tunggu kereta berhenti di papan tanda!";
+      return;
+    }
+    if (recognition) {
+      try {
+        recognition.start();
+      } catch (e) {
+        recognition.stop();
+        setTimeout(() => recognition.start(), 200);
+      }
+    } else {
+      alert("peranti/pelayar ini tidak menyokong mikrofon. sila tekan butang pilihan di bawah.");
+    }
+  }
+
+  function checkSpeechAnswer(spokenText) {
+    const correct = targetList[currentIndex];
+    let isCorrect = spokenText === correct || spokenText.includes(correct);
+
+    if (!isCorrect && phoneticMap[correct]) {
+      isCorrect = phoneticMap[correct].some(p => spokenText === p || spokenText.includes(p));
+    }
+
+    if (isCorrect) {
+      handleCorrectAnswer(correct);
+    } else {
+      statusText.innerText = `terdengar: "${spokenText}". cuba lagi!`;
+    }
+  }
+
+  function pickRandomSyllables() {
+    const shuffled = [...fullSyllableList].sort(() => 0.5 - Math.random());
+    targetList = shuffled.slice(0, 8);
+  }
+
+  function renderScene() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // langit
+    ctx.fillStyle = "#74b9ff";
+    ctx.fillRect(0, 0, canvas.width, 240);
+
+    // matahari
+    ctx.fillStyle = "#f1c40f";
+    ctx.beginPath();
+    ctx.arc(100, 70, 35, 0, Math.PI * 2);
+    ctx.fill();
+
+    // awan
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(200, 60, 20, 0, Math.PI * 2);
+    ctx.arc(220, 50, 25, 0, Math.PI * 2);
+    ctx.arc(240, 60, 20, 0, Math.PI * 2);
+    ctx.fill();
+
+    // padang
+    ctx.fillStyle = "#2ecc71";
+    ctx.fillRect(0, 240, canvas.width, 310);
+
+    // jalan raya
+    ctx.fillStyle = "#636e72";
+    ctx.beginPath();
+    ctx.moveTo(370, 240);
+    ctx.lineTo(480, 240);
+    ctx.lineTo(850, 550);
+    ctx.lineTo(0, 550);
+    ctx.fill();
+
+    // garisan jalan
+    if (!isStopped) roadOffset = (roadOffset + 4) % 40;
+    ctx.strokeStyle = "#f1c40f";
+    ctx.lineWidth = 6;
+    ctx.setLineDash([20, 20]);
+    ctx.lineDashOffset = -roadOffset;
+    ctx.beginPath();
+    ctx.moveTo(425, 240);
+    ctx.lineTo(425, 550);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // papan tanda tinggi
+    if (isStopped) {
+      ctx.fillStyle = "#7f8c8d";
+      ctx.fillRect(620, 140, 14, 180);
+
+      ctx.fillStyle = "#f1c40f";
+      ctx.strokeStyle = "#2c3e50";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(627, 130, 45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#2c3e50";
+      ctx.font = "bold 38px 'Comic Sans MS', cursive";
+      ctx.textAlign = "center";
+      ctx.fillText(targetList[currentIndex], 627, 142);
+    }
+
+    requestAnimationFrame(renderScene);
+  }
+
+  function scheduleNextSign() {
+    if (currentIndex >= targetList.length) {
+      showWinScreen();
+      return;
+    }
+
+    isStopped = false;
+    statusText.innerText = "kereta sedang bergerak...";
+    optionsContainer.innerHTML = "";
+    progress.innerText = `papan tanda: ${currentIndex + 1} / 8`;
+
+    setTimeout(() => {
+      stopAtSign();
+    }, 2500);
+  }
+
+  function stopAtSign() {
+    isStopped = true;
+    const current = targetList[currentIndex];
+    statusText.innerText = "sebut suku kata di papan tanda:";
+    generateOptions(current);
+  }
+
+  function generateOptions(correct) {
+    optionsContainer.innerHTML = "";
+    let wrong = fullSyllableList.filter(s => s !== correct).sort(() => 0.5 - Math.random()).slice(0, 2);
+    let options = [correct, ...wrong].sort(() => 0.5 - Math.random());
+
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-option';
+      btn.innerText = opt;
+      btn.onclick = () => {
+        if (opt === correct) handleCorrectAnswer(correct);
+        else statusText.innerText = "cuba lagi! pilih sebutan yang betul.";
+      };
+      optionsContainer.appendChild(btn);
+    });
+  }
+
+  function handleCorrectAnswer(syllable) {
+    correctBanner.classList.add('show');
+    statusText.innerText = "betul! pandai!";
+    optionsContainer.innerHTML = "";
+    speakSyllable(syllable);
+
+    setTimeout(() => {
+      correctBanner.classList.remove('show');
+      currentIndex++;
+      scheduleNextSign();
+    }, 1500);
+  }
+
+  function speakSyllable(text) {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ms-MY';
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  function toggleMusic() {
+    const btn = document.getElementById('btnMusic');
+    if (!isMusicOn) {
+      isMusicOn = true;
+      btn.innerText = "🎵 muzik: buka";
+      startSimpleMusic();
+    } else {
+      isMusicOn = false;
+      btn.innerText = "🎵 muzik: tutup";
+      if (musicInterval) clearInterval(musicInterval);
+    }
+  }
+
+  function startSimpleMusic() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00];
+    let noteIdx = 0;
+
+    musicInterval = setInterval(() => {
+      if (!isMusicOn) return;
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(notes[noteIdx % notes.length], audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+      noteIdx++;
+    }, 400);
+  }
+
+  function showWinScreen() {
+    winScreen.style.display = 'flex';
+  }
+
+  function resetGame() {
+    currentIndex = 0;
+    winScreen.style.display = 'none';
+    pickRandomSyllables();
+    scheduleNextSign();
+  }
+
+  window.onload = () => {
+    initSpeech();
+    pickRandomSyllables();
+    renderScene();
+    scheduleNextSign();
+  };
+</script>
+
+</body>
+</html>
